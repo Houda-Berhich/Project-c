@@ -1,0 +1,165 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Définition d'une structure pour représenter un élément d'une matrice
+typedef struct smat {
+    int i;              // Ligne de l'élément
+    int j;              // Colonne de l'élément
+    float coef;         // Valeur
+    struct smat *next;  // Pointeur vers l'élément suivant
+} smat;
+
+// Fonction pour créer un nouvel élément de matrice
+smat *creat_smat(int l, int c, float coef) {
+    smat *mat = (smat *)calloc(1, sizeof(smat));
+    if (mat == NULL) {
+        printf("Erreur d'allocation mémoire\n");
+        exit(1);
+    }
+    mat->i = l;
+    mat->j = c;
+    mat->coef = coef;
+    mat->next = NULL;
+    return mat;
+}
+
+// Fonction pour insérer un nouvel élément à la fin de la liste
+void insert(smat **head, int l, int c, float coef) {
+    smat *nouv = creat_smat(l, c, coef);
+    if (*head == NULL) {
+        *head = nouv;
+        return;
+    }
+    smat *tmp = *head;
+    while (tmp->next != NULL) {
+        tmp = tmp->next;
+    }
+    tmp->next = nouv;}
+    
+// Fonction pour chercher la valeur à la position (i,j) dans une matrice
+float chercher(smat *mat, int i, int j) {
+    while (mat != NULL) {
+        if (mat->i == i && mat->j == j)
+            return mat->coef;
+        mat = mat->next;
+    }
+    return 0;
+}
+
+
+// Fonction pour calculer la somme de deux matrices
+smat *somme_mat(smat *mat1, smat *mat2, int l, int c) {
+    smat *result = NULL;
+    for (int i = 0; i < l; i++) {
+        for (int j = 0; j < c; j++) {
+            float val1 = chercher(mat1, i, j);
+            float val2 = chercher(mat2, i, j);
+            float somme = val1 + val2;
+            insert(&result, i, j, somme);
+        }
+    }
+    return result;
+}
+// Fonction pour transformer une matrice dense (tableau 2D) en matrice de type smat
+smat * trans_mat(float mat[10][10],int c,int l){
+    int i ,j;
+    smat *head=NULL;
+    smat *tmp=head;
+    for (i=0;i<l;i++){
+        for (j=0;j<c;j++){
+            float val=mat[i][j];
+            insert(&head, i, j, val);
+        }
+    }
+    return head;
+}
+// Fonction pour afficher une matrice sous forme de tableau  
+void print_as_matrix(smat *head,int l,int c) {
+    smat *tmp = head;
+    int p=0;
+    while (tmp != NULL) {
+        printf("%.2f\t", tmp->coef);
+        p++;
+        tmp = tmp->next;
+        if (p==l){
+            p=0;
+            printf("\n");
+        }
+    }
+}
+// Fonction pour libérer la mémoire allouée pour une matrice
+void liberer(smat *head) {
+    smat *tmp;
+    while (head != NULL) {
+        tmp = head;
+        head = head->next;
+        free(tmp);
+    }
+}
+int main() {
+    int n = 4;
+    smat *mat = NULL;
+ // Création d'une matrice identité (1 sur la diagonale, 0 ailleurs)
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i == j)
+                insert(&mat, i, j, 1.0);
+            else
+                insert(&mat, i, j, 0.0);
+        }
+    }
+    
+    printf("Matrice identité :\n");
+    print_as_matrix(mat, n, n);
+    // Création des deux matrices mat1 et mat2 avec saisie utilisateu
+    
+    smat *mat1=NULL;   // Pointeur vers la première matrice creuse
+    smat *mat2=NULL;   // Pointeur vers la deuxième matrice creuse
+    
+    printf("\nRemplir la première matrice :\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            float val;
+            printf("entre une valeur:");
+            scanf("%f",&val);
+                insert(&mat1, i, j, val);}}
+    printf("\n");
+    
+    printf("\nRemplir la deuxième matrice :\n");
+  for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            float val;
+            printf("entre une valeur:");
+            scanf("%f",&val);
+                insert(&mat2, i, j, val);
+        }
+    }
+    
+    // Appel de la fonction somme_mat pour additionner les deux matrices
+    smat *mat_somme = somme_mat(mat1, mat2, n,n);
+    printf("\nMatrice Somme :\n");
+    print_as_matrix(mat_somme, n,n);// Affichage de la matrice résultante sous forme de tableau
+    
+    // Transformation d'une matrice dense en matrice de type smat
+    float mat3[10][10]={
+    {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+    {11,12,13,14,15,16,17,18,19,20},
+    {21,22,23,24,25,26,27,28,29,30},
+    {31,32,33,34,35,36,37,38,39,40},
+    {41,42,43,44,45,46,47,48,49,50},
+    {51,52,53,54,55,56,57,58,59,60},
+    {61,62,63,64,65,66,67,68,69,70},
+    {71,72,73,74,75,76,77,78,79,80},
+    {81,82,83,84,85,86,87,88,89,90},
+    {91,92,93,94,95,96,97,98,99,100}
+};
+   smat *k=trans_mat(mat3,10,10);
+   printf("\nMatrice transformée depuis un tableau :\n");
+   print_as_matrix(k, 10, 10);
+    
+    // Libération de la mémoire utilisée
+    liberer(mat1);
+    liberer(mat2);
+    liberer(k);
+    liberer(mat_somme);
+    return 0;}
